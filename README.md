@@ -1,9 +1,10 @@
 # r/RoguelikeDev Does The Complete Roguelike Tutorial
 
-I'm following [This tutorial](http://rogueliketutorials.com/libtcod/1
-) instead of the original.  
+I'm following [This tutorial](http://rogueliketutorials.com/libtcod/1) instead of the original.  
+This tutorial branches the original to Python 3.  
+I write my code in [Visual Studio Code](https://code.visualstudio.com/) and commit all my project files through [GitKraken](https://www.gitkraken.com/).
 
-Below is the information for the original tutorial page.  
+Below is the information from the original tutorial repository page.  
 
 ![RoguelikeDev Does the Complete Roguelike Tutorial Event Logo](https://i.imgur.com/ksc9EW3.png)
 
