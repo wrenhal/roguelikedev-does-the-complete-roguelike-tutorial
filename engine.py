@@ -2,14 +2,15 @@
 # Renaming to engine.py to follow http://rogueliketutorials.com/libtcod/1
 
 import libtcodpy as libtcod # Imports the Graphics library
-
+# Now adding import of the handle_keys() function
+from input_handlers import handle_keys
 
 def main(): # Adding the main function for Python 3 compatibility
 
 # Setting constants
     screen_width = 80
     screen_height = 50
-    LIMIT_FPS = 20
+    # LIMIT_FPS = 20 # Unused for now
     # Setting player coordinate starting point at center of console
     player_x = int(screen_width / 2) 
     player_y = int(screen_height / 2)
@@ -29,14 +30,26 @@ def main(): # Adding the main function for Python 3 compatibility
         # libtcod.console_put_char(0, 1, 1, '@', libtcod.BKGND_NONE) # 1,1 represents the coordinates
         libtcod.console_put_char(0, player_x, player_y, '@', libtcod.BKGND_NONE)
         libtcod.console_flush() # Flush the console which writes any changes to the screen
-
-# Initial tutorial doesn't do the next lines at first.
-# Without it the process becomes unresponsive on windows so I went straight to adding them.
   
-        key = libtcod.console_check_for_keypress() #initializing Libtcod Keyboard support
+        # key = libtcod.console_check_for_keypress() # Initializing Libtcod Keyboard support
+        # if key.vk == libtcod.KEY_ESCAPE: # Checking for ESC key to close window
+# New setup to call handle_keys() function from input_handlers.py
+        action = handle_keys(key)
 
-        if key.vk == libtcod.KEY_ESCAPE: # Checking for ESC key to close window
-                return True 
+        move = action.get('move')
+        exit = action.get('exit')
+        fullscreen = action.get('fullscreen')
+
+        if move:
+            dx, dy = move
+            player_x += dx
+            player_y += dy
+
+        if exit:
+                return True
+        
+        if fullscreen:
+            libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen)
 
 if __name__ == '__main__': # Declare the main function to be called
      main()
