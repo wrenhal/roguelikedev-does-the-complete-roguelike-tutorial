@@ -4,6 +4,10 @@
 import libtcodpy as libtcod # Imports the Graphics library
 # Now adding import of the handle_keys() function
 from input_handlers import handle_keys
+# Now adding Entity support from entity.py
+from entity import Entity
+# adding support for render functions from render_functions.py
+from render_functions import clear_all, render_all
 
 def main(): # Adding the main function for Python 3 compatibility
 
@@ -11,15 +15,19 @@ def main(): # Adding the main function for Python 3 compatibility
     screen_width = 80
     screen_height = 50
     # LIMIT_FPS = 20 # Unused for now
-    # Setting player coordinate starting point at center of console
-    player_x = int(screen_width / 2) 
-    player_y = int(screen_height / 2)
+    """
+    Setting player coordinate starting point at center of console
+    and setting an NPC character now
+    """
+    player = Entity(int(screen_width / 2), int(screen_height / 2), '@', libtcod.white)
+    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), '@', libtcod.yellow)
+    entities = [npc, player]
+
 # Initializing the library font
     libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 # Now creating the window with size constants, title, and whether fullscreen
     libtcod.console_init_root(screen_width, screen_height, 'python/libtcod tutorial', False)
     con = libtcod.console_new(screen_width, screen_height) # Allows the ability to create new consoles
-    # libtcod.sys_set_fps(LIMIT_FPS) # Good for Realtime, if turn based can comment out
 
     key = libtcod.Key()  # Setting keyboard variable for input
     mouse = libtcod.Mouse() # Setting mouse variable for input
@@ -29,16 +37,13 @@ def main(): # Adding the main function for Python 3 compatibility
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
         #libtcod.console_set_default_foreground(0, libtcod.white) 
 # Changing the way the console is initialized so we can reference different consoles later
-        libtcod.console_set_default_foreground(con, libtcod.white)
-        libtcod.console_put_char(con, player_x, player_y, '@', libtcod.BKGND_NONE)
-        libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
-        
-        # libtcod.console_put_char(0, 1, 1, '@', libtcod.BKGND_NONE) # 1,1 represents the coordinates
-        # libtcod.console_put_char(0, player_x, player_y, '@', libtcod.BKGND_NONE)
+# Removed the previous calls because render logic is now in render_functions.py
+        render_all(con,entities, screen_width, screen_height)
+
         libtcod.console_flush() # Flush the console which writes any changes to the screen
-        libtcod.console_put_char(con, player_x, player_y, ' ', libtcod.BKGND_NONE) #now erase the previous character from the screen
-        # key = libtcod.console_check_for_keypress() # Initializing Libtcod Keyboard support
-        # if key.vk == libtcod.KEY_ESCAPE: # Checking for ESC key to close window
+        
+        clear_all(con, entities)
+
 # New setup to call handle_keys() function from input_handlers.py
         action = handle_keys(key)
 
@@ -48,8 +53,9 @@ def main(): # Adding the main function for Python 3 compatibility
 
         if move:
             dx, dy = move
-            player_x += dx
-            player_y += dy
+            # player_x += dx
+            # player_y += dy
+            player.move(dx, dy)
 
         if exit:
                 return True
