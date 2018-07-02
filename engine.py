@@ -19,10 +19,10 @@ def main(): # Adding the main function for Python 3 compatibility
     screen_height = 50
     map_width = 80
     map_height = 45
-
+    brown_color = libtcod.orange * libtcod.blue
     colors = {
-        'dark_wall': libtcod.Color(0, 0, 100),
-        'dark_ground': libtcod.Color(50, 50, 150)
+        'dark_wall': brown_color, # Color(0, 0, 100),
+        'dark_ground': libtcod.desaturated_orange # Color(50, 50, 150)
     } # Coloring our tiles
     # LIMIT_FPS = 20 # Unused for now
     """
