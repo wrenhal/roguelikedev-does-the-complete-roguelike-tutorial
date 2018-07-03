@@ -19,7 +19,7 @@ def main(): # Adding the main function for Python 3 compatibility
     screen_height = 50
     map_width = 80
     map_height = 45
-    brown_color = libtcod.orange * libtcod.blue
+    brown_color = libtcod.flame * libtcod.light_blue
     colors = {
         'dark_wall': brown_color, # Color(0, 0, 100),
         'dark_ground': libtcod.desaturated_orange # Color(50, 50, 150)
