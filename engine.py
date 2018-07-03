@@ -19,6 +19,9 @@ def main(): # Adding the main function for Python 3 compatibility
     screen_height = 50
     map_width = 80
     map_height = 45
+    room_max_size = 10
+    room_min_size = 6
+    max_rooms = 30    
     brown_color = libtcod.flame * libtcod.light_blue
     colors = {
         'dark_wall': brown_color, # Color(0, 0, 100),
@@ -39,6 +42,7 @@ def main(): # Adding the main function for Python 3 compatibility
     libtcod.console_init_root(screen_width, screen_height, 'python/libtcod tutorial', False)
     con = libtcod.console_new(screen_width, screen_height) # Allows the ability to create new consoles
     game_map = GameMap(map_width, map_height) # Initialize the game map
+    game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player)
 
     key = libtcod.Key()  # Setting keyboard variable for input
     mouse = libtcod.Mouse() # Setting mouse variable for input
