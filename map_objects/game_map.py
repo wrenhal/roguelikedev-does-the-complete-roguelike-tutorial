@@ -1,5 +1,7 @@
 # GameMap class  game_map.py
+import libtcodpy as libtcod
 from random import randint
+from entity import Entity
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
 # setting up the GameMap class to be called from engine.py
@@ -12,25 +14,10 @@ class GameMap: # Now definine the class and it's properties
 
     def initialize_tiles(self): 
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
-        # Creating a 2d array tiles to fill the map and a series of blocked tiles.
-        # tiles[30][22].blocked = True
-        # tiles[30][22].block_sight = True
-        # tiles[31][22].blocked = True
-        # tiles[31][22].block_sight = True
-        # tiles[32][22].blocked = True
-        # tiles[32][22].block_sight = True
 
         return tiles
 
-    # def make_map(self):
-    #     # Create two rooms for demonstration purposes
-    #     room1 = Rect(20, 15, 10, 15)
-    #     room2 = Rect(35, 15, 10, 15)
-
-    #     self.create_room(room1)
-    #     self.create_room(room2)
-    #     self.create_h_tunnel(25, 40, 23)
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room):
         rooms = []
         num_rooms = 0
 
@@ -79,6 +66,9 @@ class GameMap: # Now definine the class and it's properties
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
+                # Place the entities into the room
+                self.place_entities(new_room, entities, max_monsters_per_room)
+
                 # finally, append the new room to the list
                 rooms.append(new_room)
                 num_rooms += 1     
@@ -99,6 +89,25 @@ class GameMap: # Now definine the class and it's properties
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
+
+    def place_entities(self, room, entities, max_monsters_per_room):
+        # Get a random number of monsters
+        number_of_monsters = randint(0, max_monsters_per_room)
+
+        for i in range(number_of_monsters):
+            # Choose a random location for the monster
+            x = randint(room.x1 + 1, room.x2 - 1)
+            y = randint(room.y1 + 1, room.y2 - 1)
+            # Now check for to see if an entity exists in that location.
+            if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                # This makes an 80% chance of getting an Orc.
+                if randint(0,100) < 80:
+                    monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', blocks=True)
+                # If falling in the 20% then make it a Troll.
+                else:
+                    monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', blocks=True)
+
+                entities.append(monster)
 
     # Method to determine if tile is blocked.
     def is_blocked(self, x, y):
