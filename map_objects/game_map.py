@@ -1,4 +1,6 @@
 # GameMap class  game_map.py
+
+# Imports for GameMap Class functions
 import libtcodpy as libtcod
 from random import randint
 from entity import Entity
