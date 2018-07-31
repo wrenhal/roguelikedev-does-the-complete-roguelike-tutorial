@@ -4,3 +4,5 @@ map_objects/__pycache__/
 
 libtcodpy/_pycache__/
 __pycache__/entity.cpython-36.pyc
+
+*.pyc

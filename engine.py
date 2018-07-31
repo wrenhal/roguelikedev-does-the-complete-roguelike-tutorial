@@ -5,13 +5,16 @@ import libtcodpy as libtcod # Imports the Graphics library
 # Now adding import of the handle_keys() function
 from input_handlers import handle_keys
 # Now adding Entity support from entity.py
-from entity import Entity
+from entity import Entity, get_blocking_entities_at_location
 # Adding support for render functions from render_functions.py
 from render_functions import clear_all, render_all
 # Now importing logic for creating the game map.
 from map_objects.game_map import GameMap
 # Import the FOV functions
 from fov_functions import initialize_fov, recompute_fov
+# Import GameStates function to store Enum information
+from game_states import GameStates
+
 
 
 def main(): # Adding the main function for Python 3 compatibility
@@ -55,7 +58,9 @@ def main(): # Adding the main function for Python 3 compatibility
     fov_map = initialize_fov(game_map) #Initialize the Field of View
     key = libtcod.Key()  # Setting keyboard variable for input
     mouse = libtcod.Mouse() # Setting mouse variable for input
-    
+    # Creating variable for Gamestate to set player turn to default
+    game_state = GameStates.PLAYERS_TURN
+        
 # Next is the main game loop.  We basically print the @ character to the screen in white
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
@@ -80,20 +85,33 @@ def main(): # Adding the main function for Python 3 compatibility
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
 
-        if move:
+        if move and game_state == GameStates.PLAYERS_TURN: # Check to see whose move it is.
             dx, dy = move
-            # player_x += dx
-            # player_y += dy
-            # player.move(dx, dy) updating player.move logic
-            if not game_map.is_blocked(player.x + dx, player.y + dy):
-                player.move(dx, dy)
-                fov_recompute = True # Recompute the FOV upon movement
+            destination_x = player.x + dx
+            destination_y = player.y + dy
+            # adding in the ability to detect and kick monsters
+            if not game_map.is_blocked(destination_x, destination_y):
+                target = get_blocking_entities_at_location(entities, destination_x, destination_y)
+                if target:
+                    print('You kick the ' + target.name + ' in the shins, much to its annoyance!')
+                else:
+                    player.move(dx, dy)
+                    fov_recompute = True # Recompute the FOV upon movement
+                game_state = GameStates.ENEMY_TURN
+
 
         if exit:
                 return True
         
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen)
+
+        if game_state == GameStates.ENEMY_TURN:
+            for entity in entities:
+                if entity != player:
+                    print('The ' + entity.name + ' ponders the meaning of its existence.')
+
+            game_state = GameStates.PLAYERS_TURN
 
 if __name__ == '__main__': # Declare the main function to be called
      main()
