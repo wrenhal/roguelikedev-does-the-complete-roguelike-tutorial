@@ -1,4 +1,5 @@
-# Game state file to keep track of things such as player or monster turns
+# game_states.py
+# separates out the logic ffor keeping track of turns in an enum 
 
 from enum import Enum
 
@@ -6,5 +7,3 @@ from enum import Enum
 class GameStates(Enum):
     PLAYERS_TURN = 1
     ENEMY_TURN = 2
-
-
