@@ -6,3 +6,4 @@ libtcodpy/_pycache__/
 __pycache__/entity.cpython-36.pyc
 
 *.pyc
+\.vscode/
