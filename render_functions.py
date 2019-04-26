@@ -8,8 +8,25 @@ class RenderOrder(Enum):
     ITEM = 2
     ACTOR = 3
 
-# def render_all(con, entities, game_map, screen_width, screen_height, colors):
-def render_all(con, entities, player, game_map, fov_map, fov_recompute, screen_width, screen_height, colors):
+# The following function allows for creation of a bar.  This will be reusable
+# But for now we are only going to create an HP bar.
+def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
+    bar_width = int(float(value) / maximum * total_width)
+
+    libtcod.console_set_default_background(panel, back_color)
+    libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
+
+    libtcod.console_set_default_background(panel, bar_color)
+    if bar_width > 0:
+        libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
+
+    libtcod.console_set_default_foreground(panel, libtcod.white)
+    libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER,
+                             '{0}: {1}/{2}'.format(name, value, maximum))
+
+# This is the main function to draw the map and all entities on the screen.  It also computes the Field of View.
+# Added to this is also a 7 pixel high Message panel.
+def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, screen_width, screen_height, bar_width, panel_height, panel_y, colors):
     if fov_recompute:
     # Draw all the tiles in the game map
         for y in range(game_map.height):
@@ -35,12 +52,18 @@ def render_all(con, entities, player, game_map, fov_map, fov_recompute, screen_w
     # Draw all entities in the list to the given console
     for entity in entities_in_render_order:
         draw_entity(con, entity, fov_map)
-        
-    libtcod.console_set_default_foreground(con, libtcod.white)
-    libtcod.console_print_ex(con, 1, screen_height - 2, libtcod.BKGND_NONE, libtcod.LEFT,
-                         'HP: {0:02}/{1:02}'.format(player.fighter.hp, player.fighter.max_hp))
 
+# This line draws our map to the screen.
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
+
+# Following creates the panel needed to display messages
+    libtcod.console_set_default_background(panel, libtcod.black)
+    libtcod.console_clear(panel)
+    # Following creates our HP bar
+    render_bar(panel, 1, 1, bar_width, 'HP', player.fighter.hp, player.fighter.max_hp,
+               libtcod.light_red, libtcod.darker_red)
+    # This then draws the panel to the screen.
+    libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
 def clear_all(con, entities):
     for entity in entities:

@@ -24,8 +24,11 @@ def main(): # Adding the main function for Python 3 compatibility
 # Setting constants and global variables
     screen_width = 80
     screen_height = 50
+    bar_width = 20
+    panel_height = 7
+    panel_y = screen_height - panel_height
     map_width = 80
-    map_height = 45
+    map_height = 43
     room_max_size = 10
     room_min_size = 6
     max_rooms = 30
@@ -51,6 +54,7 @@ def main(): # Adding the main function for Python 3 compatibility
 # Now creating the window with size constants, title, and whether fullscreen
     libtcod.console_init_root(screen_width, screen_height, 'python/libtcod tutorial', False)
     con = libtcod.console_new(screen_width, screen_height) # Allows the ability to create new consoles
+    panel = libtcod.console_new(screen_width, panel_height)  # New console to hold HP and Messages
     game_map = GameMap(map_width, map_height) # Initialize the game map
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room)
     fov_recompute = True # Whether to reset the Field of View, True for start of game
@@ -67,9 +71,8 @@ def main(): # Adding the main function for Python 3 compatibility
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 # Changing the way the console is initialized so we can reference different consoles later
-# Removed the previous calls because render logic is now in render_functions.py
-        # render_all(con, entities, game_map, screen_width, screen_height, colors)
-        render_all(con, entities, player, game_map, fov_map, fov_recompute, screen_width, screen_height, colors)
+
+        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, screen_width, screen_height, bar_width, panel_height, panel_y, colors)
 
         fov_recompute = False
 
