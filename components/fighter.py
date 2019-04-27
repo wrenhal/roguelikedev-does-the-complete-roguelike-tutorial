@@ -1,4 +1,6 @@
 # Base Fighter class that will include the Player and Monsters
+import tcod as libtcod
+from game_messages import Message
 
 class Fighter:
     def __init__(self, hp, defense, power):
@@ -20,13 +22,18 @@ class Fighter:
         damage = self.power - target.fighter.defense # Is power greater than defense?
 
         if damage > 0: # If so then calculate damage.
+            # changing message for damage to use the Message Class
             # Place results into results [] (This includes a message showing damage done)
-            results.append({'message': '{0} attacks {1} for {2} hit points.'.format(
-                self.owner.name.capitalize(), target.name, str(damage))})
+            # results.append({'message': '{0} attacks {1} for {2} hit points.'.format(
+            #    self.owner.name.capitalize(), target.name, str(damage))})
+            results.append({'message': Message('{0} attacks {1} for {2} hit points.'.format(
+                self.owner.name.capitalize(), target.name, str(damage)), libtcod.white)})
             results.extend(target.fighter.take_damage(damage)) # This adds results from take_damage function.  Death message or nothing
         else: # If not greater then no damage
             # Place following message into results if no damage done
-            results.append({'message': '{0} attacks {1} but does no damage.'.format(
-                self.owner.name.capitalize(), target.name)})
+            # results.append({'message': '{0} attacks {1} but does no damage.'.format(
+            #    self.owner.name.capitalize(), target.name)})
+            results.append({'message': Message('{0} attacks {1} but does no damage.'.format(
+                self.owner.name.capitalize(), target.name), libtcod.white)})
 
         return results  # Return the list to the calling function.

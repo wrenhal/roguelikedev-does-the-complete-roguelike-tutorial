@@ -1,6 +1,9 @@
 # This will be my working main file for the RogueLike tutorial
 # Renaming to engine.py to follow http://rogueliketutorials.com/libtcod/1
 
+# 4/26/2019 Replacing all print statements with calls to the Message_log.add_message function
+# and adding code to handle mouse events in preparation for mouse_over events.
+
 import libtcodpy as libtcod # Imports the Graphics library
 # Now adding import of the handle_keys() function
 from input_handlers import handle_keys
@@ -12,6 +15,8 @@ from render_functions import clear_all, render_all, RenderOrder
 from map_objects.game_map import GameMap
 # Import the FOV functions
 from fov_functions import initialize_fov, recompute_fov
+# import MessageLog function
+from game_messages import MessageLog
 # Import GameStates enum
 from game_states import GameStates
 # Import Fighter class
@@ -27,6 +32,11 @@ def main(): # Adding the main function for Python 3 compatibility
     bar_width = 20
     panel_height = 7
     panel_y = screen_height - panel_height
+# Adding variables Message log display to show events.
+    message_x = bar_width + 2
+    message_width = screen_width - bar_width - 2
+    message_height = panel_height - 1
+
     map_width = 80
     map_height = 43
     room_max_size = 10
@@ -59,6 +69,7 @@ def main(): # Adding the main function for Python 3 compatibility
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room)
     fov_recompute = True # Whether to reset the Field of View, True for start of game
     fov_map = initialize_fov(game_map) #Initialize the Field of View
+    message_log = MessageLog(message_x, message_width, message_height)
     key = libtcod.Key()  # Setting keyboard variable for input
     mouse = libtcod.Mouse() # Setting mouse variable for input
     game_state = GameStates.PLAYERS_TURN # Sets initial game_state to players turn
@@ -66,13 +77,14 @@ def main(): # Adding the main function for Python 3 compatibility
     
 # Next is the main game loop.  We basically print the @ character to the screen in white
     while not libtcod.console_is_window_closed():
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
         #libtcod.console_set_default_foreground(0, libtcod.white) 
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 # Changing the way the console is initialized so we can reference different consoles later
 
-        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, screen_width, screen_height, bar_width, panel_height, panel_y, colors)
+        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width,
+                   screen_height, bar_width, panel_height, panel_y, mouse, colors)
 
         fov_recompute = False
 
@@ -112,13 +124,14 @@ def main(): # Adding the main function for Python 3 compatibility
         
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-
-        for player_turn_result in player_turn_results: # Iterate through the results
+# Iterate through the results
+        # Player Results Loop
+        for player_turn_result in player_turn_results: 
             message = player_turn_result.get('message') # Get the message part
             dead_entity = player_turn_result.get('dead') # Get the part as to whether dead or not
 
             if message:
-                print(message) # Print the results of the attack message
+                message_log.add_message(message) # Prints any messages for the player turn
 
             if dead_entity: # Check is something dead this turn
                 if dead_entity == player: # Is the dead thing the player?
@@ -126,8 +139,8 @@ def main(): # Adding the main function for Python 3 compatibility
                 else:
                     message = kill_monster(dead_entity) # Run kill_monster function
 
-                print(message)
-
+                message_log.add_message(message)
+        # Enemy Results Loop
         if game_state == GameStates.ENEMY_TURN: # Checks to see if enemy turn
             for entity in entities: # Cycles through entities looking for monsters
                 if entity.ai: # If entity is not the player and has ai.
@@ -139,7 +152,7 @@ def main(): # Adding the main function for Python 3 compatibility
                         dead_entity = enemy_turn_result.get('dead') # get and dead comments
 
                         if message:
-                            print(message) # Print any messages for the turn of the ai
+                            message_log.add_message(message) # Print any messages for the turn of the ai
 
                         if dead_entity: # Check if dead entity this turn
                             if dead_entity == player: # Is it the player?
@@ -147,7 +160,7 @@ def main(): # Adding the main function for Python 3 compatibility
                             else:
                                 message = kill_monster(dead_entity) # If it's the monster, then kill it.
 
-                            print(message)
+                            message_log.add_message(message)
 
                             if game_state == GameStates.PLAYER_DEAD: # Did the player die?
                                 break # If dead player then end game.

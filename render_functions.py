@@ -1,3 +1,5 @@
+# 4/26/2019 Changing Render_all to accommodate Message class.
+# Also adding function to handle mouse over events.
 import libtcodpy as libtcod
 
 from enum import Enum
@@ -8,6 +10,14 @@ class RenderOrder(Enum):
     ITEM = 2
     ACTOR = 3
 
+def get_names_under_mouse(mouse, entities, fov_map):
+    (x, y) = (mouse.cx, mouse.cy)
+
+    names = [entity.name for entity in entities
+             if entity.x == x and entity.y == y and libtcod.map_is_in_fov(fov_map, entity.x, entity.y)]
+    names = ', '.join(names)
+
+    return names.capitalize()
 # The following function allows for creation of a bar.  This will be reusable
 # But for now we are only going to create an HP bar.
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
@@ -26,7 +36,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 
 # This is the main function to draw the map and all entities on the screen.  It also computes the Field of View.
 # Added to this is also a 7 pixel high Message panel.
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, screen_width, screen_height, bar_width, panel_height, panel_y, colors):
+def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width,                       screen_height, bar_width, panel_height, panel_y, mouse, colors):
     if fov_recompute:
     # Draw all the tiles in the game map
         for y in range(game_map.height):
@@ -59,9 +69,21 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, s
 # Following creates the panel needed to display messages
     libtcod.console_set_default_background(panel, libtcod.black)
     libtcod.console_clear(panel)
+
+    # Following  renders the Message Log to the screen.
+    # Print the game messages, one line at a time
+    y = 1
+    for message in message_log.messages:
+        libtcod.console_set_default_foreground(panel, message.color)
+        libtcod.console_print_ex(panel, message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
+        y += 1
     # Following creates our HP bar
     render_bar(panel, 1, 1, bar_width, 'HP', player.fighter.hp, player.fighter.max_hp,
                libtcod.light_red, libtcod.darker_red)
+    # mouse handling added.
+    libtcod.console_set_default_foreground(panel, libtcod.light_gray)
+    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,
+                             get_names_under_mouse(mouse, entities, fov_map))           
     # This then draws the panel to the screen.
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
